@@ -13,8 +13,14 @@ function normalizeURL(url) {
 	}
 }
 
-function getURLsFromHTML() {
-
+function getURLsFromHTML(htmlBody, baseURL) {
+	const dom = new JSDOM(htmlBody)
+	const elements = dom.window.document.querySelectorAll('a')
+	const result = []
+	for (const element of elements) {
+		result.push(baseURL + element)
+	}
+	return result
 }
 
 export { normalizeURL, getURLsFromHTML }
