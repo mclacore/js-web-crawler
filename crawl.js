@@ -18,7 +18,11 @@ function getURLsFromHTML(htmlBody, baseURL) {
 	const elements = dom.window.document.querySelectorAll('a')
 	const result = []
 	for (const element of elements) {
-		result.push(baseURL + element)
+		if (element.href.startsWith('http')) {
+			result.push(element.href)
+		} else {
+			result.push(baseURL + element + '/')
+		}
 	}
 	return result
 }
