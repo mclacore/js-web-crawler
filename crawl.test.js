@@ -82,3 +82,19 @@ test('convert all relative URLs to absolute URLs', () => {
 	]
 	expect(actual).toEqual(expected)
 })
+
+test('fetch absolute url from html', () => {
+	const htmlBody = `
+<html>
+	<body>
+		<a href="https://blog.boot.dev"</a>
+	<body>
+</html>
+`
+	const baseURL = 'https://blog.boot.dev'
+	const actual = getURLsFromHTML(htmlBody, baseURL)
+	const expected = ['https://blog.boot.dev']
+	expect(actual).toEqual(expected)
+})
+
+// fetch absolute and relative from html
