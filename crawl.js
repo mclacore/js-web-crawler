@@ -16,15 +16,15 @@ function normalizeURL(url) {
 function getURLsFromHTML(htmlBody, baseURL) {
 	const dom = new JSDOM(htmlBody)
 	const elements = dom.window.document.querySelectorAll('a')
-	const result = []
+	const urls = []
 	for (const element of elements) {
 		if (element.href.startsWith('http')) {
-			result.push(element.href)
+			urls.push(element.href)
 		} else {
-			result.push(baseURL + element + '/')
+			urls.push(baseURL + element + '/')
 		}
 	}
-	return result
+	return urls
 }
 
 export { normalizeURL, getURLsFromHTML }
