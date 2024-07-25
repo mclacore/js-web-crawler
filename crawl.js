@@ -1,16 +1,12 @@
 import { JSDOM } from 'jsdom'
 
 function normalizeURL(url) {
-	try {
-		const normURL = new URL(url)
-		const fullPath = normURL.hostname + normURL.pathname
-		if (fullPath.startsWith('www.')) {
-			return url.endsWith('/') ? fullPath.slice(4, -1) : fullPath.slice(4)
-		}
-		return url.endsWith('/') ? fullPath.slice(0, -1) : fullPath
-	} catch (err) {
-		console.log('Not a valid URL')
+	const urlObj = new URL(url)
+	let fullPath = urlObj.hostname + urlObj.pathname
+	if (fullPath.slice(-1) === '/') {
+		fullPath = fullPath.slice(0, -1)
 	}
+	return fullPath
 }
 
 function getURLsFromHTML(htmlBody, baseURL) {
@@ -18,10 +14,15 @@ function getURLsFromHTML(htmlBody, baseURL) {
 	const elements = dom.window.document.querySelectorAll('a')
 	const urls = []
 	for (const element of elements) {
-		if (element.href.startsWith('http')) {
-			urls.push(element.href)
-		} else {
-			urls.push(baseURL + element + '/')
+		if (element.hasAttribute('href')) {
+			let href = element.getAttribute('href')
+
+			try {
+				href = new URL(href, baseURL).href
+				urls.push(href)
+			} catch (err) {
+				console.log(err.message)
+			}
 		}
 	}
 	return urls
@@ -54,7 +55,7 @@ async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
 	const current = new URL(currentURL)
 	const base = new URL(baseURL)
 
-	if (current.hostname != base.hostname) {
+	if (current.hostname !== base.hostname) {
 		return pages
 	}
 
@@ -62,13 +63,19 @@ async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
 	if (pages[normURL] > 0) {
 		pages[normURL]++
 		return pages
-	} else {
-		pages[normURL] = 1
 	}
+
+	pages[normURL] = 1
 
 	console.log(`Crawling ${currentURL}`)
 
-	const html = fetchParse(currentURL)
+	let html
+	try {
+		html = await fetchParse(currentURL)
+	} catch (err) {
+		console.log(err.message)
+		return pages
+	}
 
 	const nextURLs = getURLsFromHTML(html, baseURL)
 	for (const nextURL of nextURLs) {

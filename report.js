@@ -2,17 +2,19 @@ function printReport(pages) {
 	console.log('Report is starting...')
 	const sorted = reportSort(pages)
 	for (const page in sorted) {
-		console.log(`Found ${page[1]} internal links for ${page[0]}`)
+		const url = page[0]
+		const count = page[1]
+		console.log(`Found ${count} internal links for ${url}`)
 	}
 }
 
 function reportSort(pages) {
 	const pagesArray = Object.entries(pages)
-	pagesArray.sort((key1, key2) => {
-		if (key2[1] === key1[1]) {
-			return key1[0].localeCompare(key2[0])
+	pagesArray.sort((pageA, pageB) => {
+		if (pageB[1] === pageA[1]) {
+			return pageA[0].localeCompare(pageB[0])
 		}
-		return key2[1] - key1[1]
+		return pageB[1] - pageA[1]
 	})
 
 	return pagesArray
