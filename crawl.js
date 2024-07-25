@@ -27,14 +27,12 @@ function getURLsFromHTML(htmlBody, baseURL) {
 	return urls
 }
 
-async function crawlPage(url) {
-	console.log(`Crawling ${url}`)
-
+async function fetchParse(url) {
 	let resp
 	try {
 		resp = await fetch(url)
 	} catch (err) {
-		throw new Error(`Error fetching URL: ${err.message}`)
+		console.log(`Error fetching URL: ${err}`)
 	}
 
 	if (resp.status >= 400) {
@@ -48,7 +46,36 @@ async function crawlPage(url) {
 		return
 	}
 
-	console.log(resp.text())
+	return resp.text()
+}
+
+async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
+
+	const current = new URL(currentURL)
+	const base = new URL(baseURL)
+
+	if (current.hostname != base.hostname) {
+		return pages
+	}
+
+	const normURL = normalizeURL(currentURL)
+	if (pages[normURL] > 0) {
+		pages[normURL]++
+		return pages
+	} else {
+		pages[normURL] = 1
+	}
+
+	console.log(`Crawling ${currentURL}`)
+
+	const html = fetchParse(currentURL)
+
+	const nextURLs = getURLsFromHTML(html, baseURL)
+	for (const nextURL of nextURLs) {
+		pages = await crawlPage(baseURL, nextURL, pages)
+	}
+
+	return pages
 }
 
 export { normalizeURL, getURLsFromHTML, crawlPage }
